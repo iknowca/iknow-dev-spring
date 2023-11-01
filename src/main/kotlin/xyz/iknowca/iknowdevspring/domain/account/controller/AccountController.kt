@@ -16,4 +16,9 @@ class AccountController(
     fun signUp(@RequestBody signUpForm: SignUpForm):ResponseEntity<Map<String, String>> {
         return accountService.signUp(signUpForm)
     }
+
+    @GetMapping
+    fun signIn(@RequestBody signUpForm: SignUpForm): ResponseEntity<Map<String, String>> {
+        return accountService.signIn(signUpForm)
+    }
 }

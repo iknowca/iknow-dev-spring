@@ -6,4 +6,5 @@ import xyz.iknowca.iknowdevspring.domain.account.entity.Account
 
 interface AccountService {
     fun signUp(signUpForm: SignUpForm): ResponseEntity<Map<String, String>>
+    fun signIn(signUpForm: SignUpForm): ResponseEntity<Map<String, String>>
 }

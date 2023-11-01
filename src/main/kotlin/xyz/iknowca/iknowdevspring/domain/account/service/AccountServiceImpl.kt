@@ -21,4 +21,12 @@ class AccountServiceImpl(
         return ResponseEntity.ok()
             .body(mapOf("status" to "ok"))
     }
+
+    override fun signIn(signUpForm: SignUpForm): ResponseEntity<Map<String, String>> {
+        val savedAccount = accountRepository.findByEmailAndPassword(signUpForm.email, signUpForm.password)
+            ?: return ResponseEntity.noContent().build()
+
+        return ResponseEntity.ok()
+            .body(mapOf("status" to "success", "accountId" to savedAccount.id.toString()))
+    }
 }
