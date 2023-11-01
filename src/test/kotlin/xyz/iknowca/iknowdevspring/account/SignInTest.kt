@@ -5,15 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.get
 import xyz.iknowca.iknowdevspring.domain.account.controller.AccountController
-import xyz.iknowca.iknowdevspring.domain.account.controller.form.SignUpForm
+import xyz.iknowca.iknowdevspring.domain.account.controller.form.SignForm
 import xyz.iknowca.iknowdevspring.domain.account.entity.Account
 import xyz.iknowca.iknowdevspring.domain.account.repository.AccountRepository
 import xyz.iknowca.iknowdevspring.domain.account.service.AccountServiceImpl
@@ -36,12 +29,12 @@ class SignInTest: BehaviorSpec({
 
         val email = "test@test.com"
         val password = "password"
-        val signUpForm = SignUpForm(email, password)
+        val signForm = SignForm(email, password)
 
         When ("db에 일치하는 이메일과 비밀번호가 일치하는 계정이 존재한다면") {
 
             every { accountRepository.findByEmailAndPassword(email, password) } returns Account(email, password)
-            val response = accountController.signIn(signUpForm)
+            val response = accountController.signIn(signForm)
 
             Then ("accountId를 반환한다.") {
                 response.body?.get("accountId") shouldNotBe  null
@@ -50,7 +43,7 @@ class SignInTest: BehaviorSpec({
         }
         When ("db에 이메일과 비밀번호가 일치하는 계정이 존재하지 않는다면") {
             every { accountRepository.findByEmailAndPassword(email, password) } returns null
-            val response = accountController.signIn(signUpForm)
+            val response = accountController.signIn(signForm)
 
             Then ( "null을 반환한다.") {
                 response.body shouldBe null
