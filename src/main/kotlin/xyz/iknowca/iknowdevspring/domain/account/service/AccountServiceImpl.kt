@@ -1,6 +1,7 @@
 package xyz.iknowca.iknowdevspring.domain.account.service
 
 import lombok.RequiredArgsConstructor
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import xyz.iknowca.iknowdevspring.domain.account.controller.form.SignForm
@@ -15,12 +16,11 @@ class AccountServiceImpl(
 ):AccountService {
     override fun signUp(signForm: SignForm): ResponseEntity<Map<String, String>> {
         if(accountRepository.existsByEmail(signForm.email)) {
-            return ResponseEntity.noContent()
-                .build()
+            return ResponseEntity.status(HttpStatus.CONFLICT).build()
         }
-        val account = accountRepository.save(Account(signForm.email, signForm.password))
+        val account:Account = accountRepository.save(Account(signForm.email, signForm.password))
         return ResponseEntity.ok()
-            .body(mapOf("status" to "ok"))
+            .body(mapOf("status" to "success"))
     }
 
     override fun signIn(signForm: SignForm): ResponseEntity<Map<String, String>> {
