@@ -25,7 +25,7 @@ class AccountServiceImpl(
 
     override fun signIn(signForm: SignForm): ResponseEntity<Map<String, String>> {
         val savedAccount = accountRepository.findByEmailAndPassword(signForm.email, signForm.password)
-            ?: return ResponseEntity.noContent().build()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return ResponseEntity.ok()
             .body(mapOf("status" to "success", "accountId" to savedAccount.id.toString()))
