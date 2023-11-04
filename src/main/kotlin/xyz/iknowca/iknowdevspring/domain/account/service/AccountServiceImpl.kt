@@ -31,10 +31,10 @@ class AccountServiceImpl(
             .body(mapOf("status" to "success", "accountId" to savedAccount.id.toString()))
     }
 
-    override fun getAccountInfo(accountId: Long): ResponseEntity<AccountDto> {
-        val maybeAccount = accountRepository.findById(accountId)
+    override fun getAccountInfo(auth: String): ResponseEntity<AccountDto> {
+        val maybeAccount = accountRepository.findById(auth.toLong())
         if (maybeAccount.isEmpty) {
-            return ResponseEntity.noContent().build()
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
         return ResponseEntity.ok(AccountDto(maybeAccount.get().email))

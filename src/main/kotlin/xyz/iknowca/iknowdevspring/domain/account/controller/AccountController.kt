@@ -24,7 +24,7 @@ class AccountController(
     }
 
     @GetMapping
-    fun getAccount(accountId: Long): ResponseEntity<AccountDto> {
-        return accountService.getAccountInfo(accountId)
+    fun getAccount(@RequestHeader("authorization") auth:String): ResponseEntity<AccountDto> {
+        return accountService.getAccountInfo(auth)
     }
 }
