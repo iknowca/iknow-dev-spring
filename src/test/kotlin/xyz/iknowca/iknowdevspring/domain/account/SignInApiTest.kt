@@ -12,6 +12,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import xyz.iknowca.iknowdevspring.domain.account.controller.AccountController
 import xyz.iknowca.iknowdevspring.domain.account.controller.form.SignForm
 import xyz.iknowca.iknowdevspring.domain.account.entity.Account
+import xyz.iknowca.iknowdevspring.domain.account.entity.Role
+import xyz.iknowca.iknowdevspring.domain.account.entity.RoleType
 import xyz.iknowca.iknowdevspring.domain.account.repository.AccountRepository
 import xyz.iknowca.iknowdevspring.domain.account.service.AccountServiceImpl
 
@@ -32,8 +34,10 @@ class SignInApiTest : BehaviorSpec() {
             every { accountRepository.findByEmailAndPassword(any(), any()) } returns null
             every { accountRepository.findByEmailAndPassword(email, password) } returns Account(
                 email,
-                password
-            ).apply { id = 1L }
+                password,
+                listOf(Role(RoleType.NORMAL)),
+                1
+            )
 
             When("사용자가 적합한 이메일과 적합한 패스워드로 로그인을 시도한다면") {
 
