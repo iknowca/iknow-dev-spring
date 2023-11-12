@@ -33,4 +33,12 @@ class NoticeServiceImpl(
         return ResponseEntity.ok(mapOf("status" to "success", "noticeId" to savedNotice.id.toString()))
     }
 
+    override fun getNotice(noticeId: Long): ResponseEntity<NoticeDto> {
+        val maybeNotice = noticeRepository.findById(noticeId)
+        if (maybeNotice.isEmpty) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
+        val notice = maybeNotice.get()
+        return ResponseEntity.ok(NoticeDto(notice.title, notice.content, noticeId))
+    }
 }

@@ -6,4 +6,5 @@ import xyz.iknowca.iknowdevspring.domain.notice.entity.NoticeDto
 
 interface NoticeService {
     fun postNotice(requestBody: NoticeDto, authorization: String?): ResponseEntity<Map<String, String>>
+    fun getNotice(noticeId: Long): ResponseEntity<NoticeDto>
 }
