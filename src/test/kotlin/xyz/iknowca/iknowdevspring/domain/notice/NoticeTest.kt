@@ -7,7 +7,9 @@ import io.mockk.every
 import io.mockk.mockk
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import xyz.iknowca.iknowdevspring.domain.account.entity.Account
@@ -23,7 +25,7 @@ import xyz.iknowca.iknowdevspring.domain.notice.service.NoticeServiceImpl
 import java.util.*
 
 @SpringBootTest
-class NoticeTest: BehaviorSpec() {
+class NoticeTest : BehaviorSpec() {
     override fun isolationMode(): IsolationMode = IsolationMode.InstancePerTest
 
 
@@ -31,7 +33,14 @@ class NoticeTest: BehaviorSpec() {
 
         val accountRepository = mockk<AccountRepository>()
         val noticeRepository = mockk<NoticeRepository>()
-        val mockMvc = MockMvcBuilders.standaloneSetup(NoticeCotroller(NoticeServiceImpl(noticeRepository, AccountServiceImpl(accountRepository)))).build()
+        val mockMvc = MockMvcBuilders.standaloneSetup(
+            NoticeCotroller(
+                NoticeServiceImpl(
+                    noticeRepository,
+                    AccountServiceImpl(accountRepository)
+                )
+            )
+        ).build()
 
         val title = "제목"
         val requestContent = "본문"
@@ -39,7 +48,8 @@ class NoticeTest: BehaviorSpec() {
         val requestDto = NoticeDto(title, requestContent)
         val requestBody = jacksonObjectMapper().writeValueAsString(requestDto)
 
-        val adminAccount = Account("adminAccount", "testPassword", listOf(Role(RoleType.NORMAL), Role(RoleType.ADMIN)), 1L)
+        val adminAccount =
+            Account("adminAccount", "testPassword", listOf(Role(RoleType.NORMAL), Role(RoleType.ADMIN)), 1L)
         val normalAccount = Account("normalAccount", "testPassword", listOf(Role(RoleType.NORMAL)), 2L)
 
 
@@ -66,17 +76,17 @@ class NoticeTest: BehaviorSpec() {
                 }
                 Then("status:success, noticeId:${noticeId}") {
                     result.andExpect {
-                        jsonPath("$.status"){value("success")}
+                        jsonPath("$.status") { value("success") }
                     }.andExpect {
-                        jsonPath("$.noticeId") { value(noticeId.toString())}
+                        jsonPath("$.noticeId") { value(noticeId.toString()) }
                     }
                 }
                 result.andDo { print() }
             }
             When("NORMAL 유저의 요청이라면") {
                 val result = mockMvc.post("/notice") {
-                    contentType=MediaType.APPLICATION_JSON
-                    content=requestBody
+                    contentType = MediaType.APPLICATION_JSON
+                    content = requestBody
                     accept = MediaType.APPLICATION_JSON
                     header(HttpHeaders.AUTHORIZATION, normalAccount.id.toString())
                 }
@@ -88,14 +98,46 @@ class NoticeTest: BehaviorSpec() {
             }
             When("로그인하지 않은 사용자의 요청이라면") {
                 val result = mockMvc.post("/notice") {
-                    contentType=MediaType.APPLICATION_JSON
-                    content=requestBody
+                    contentType = MediaType.APPLICATION_JSON
+                    content = requestBody
                     accept = MediaType.APPLICATION_JSON
                 }
                 Then("상태코드는 401 Unauthorized") {
                     result.andExpect {
                         status { isUnauthorized() }
                     }
+                }
+            }
+        }
+
+        val notice = Notice("title", "content", 1L)
+
+        Given("사용자가 공지사항을 조회할 경우") {
+            every { noticeRepository.findById(any()) } returns Optional.empty()
+            every { noticeRepository.findById(noticeId) } returns Optional.of(notice)
+            When("존재하는 공지사항의 정보라면") {
+                val result = mockMvc.get("/notice/${notice.id}") {
+                    contentType = MediaType.APPLICATION_JSON
+                    accept = MediaType.APPLICATION_JSON
+                }
+                Then("상태코드는 OK") {
+                    result.andExpect { status { isOk() } }
+                }
+                Then("notice엔티티를 반환한다") {
+                    result.andExpectAll {
+                        jsonPath("$.id") { value(notice.id) }
+                        jsonPath("$.title") { value(notice.title) }
+                        jsonPath("$.content") { value(notice.content) }
+                    }
+                }
+            }
+            When("존재하지 않는 공지사항의 정보라면") {
+                val result = mockMvc.get("/notice/2") {
+                    contentType = MediaType.APPLICATION_JSON
+                    accept = MediaType.APPLICATION_JSON
+                }
+                Then("상태코드는 204 NoContent") {
+                    result.andExpect { status { HttpStatus.NO_CONTENT } }
                 }
             }
         }
