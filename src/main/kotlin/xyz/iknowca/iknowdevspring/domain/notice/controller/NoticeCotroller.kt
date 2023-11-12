@@ -1,0 +1,24 @@
+package xyz.iknowca.iknowdevspring.domain.notice.controller
+
+import lombok.RequiredArgsConstructor
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import xyz.iknowca.iknowdevspring.domain.notice.entity.NoticeDto
+import xyz.iknowca.iknowdevspring.domain.notice.service.NoticeService
+
+@RestController
+@RequestMapping("/notice")
+@RequiredArgsConstructor
+class NoticeCotroller(val noticeService: NoticeService) {
+    @PostMapping
+    fun postNotice(@RequestBody requestBody: NoticeDto,
+                   @RequestHeader("authorization", required = false) authorization: String?
+    ):ResponseEntity<Map<String, String>> {
+        return noticeService.postNotice(requestBody, authorization)
+    }
+}
