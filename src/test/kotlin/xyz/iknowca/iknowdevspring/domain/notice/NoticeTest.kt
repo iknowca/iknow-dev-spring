@@ -4,7 +4,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.maps.haveValues
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.Page
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -221,6 +224,55 @@ class NoticeTest : BehaviorSpec() {
                 }
                 Then("상태코드 204 NoContent") {
                     result.andExpect { status { HttpStatus.NO_CONTENT } }
+                }
+            }
+        }
+        Given("사용자가 공지사항 삭제를 요청하면") {
+
+            val notice = Notice("testTitle", "testContent", 1L)
+            val adminAccount =
+                Account("admin_email", "admin_password", listOf(Role(RoleType.ADMIN), Role(RoleType.NORMAL)), 1L)
+            val nonExistNoticeId = 2L
+            val normalAccount = Account("normal_email", "normal_password", listOf( Role(RoleType.NORMAL)),2L)
+
+            every { accountRepository.findById(adminAccount.id) } returns Optional.of(adminAccount)
+            every { accountRepository.findById(normalAccount.id) } returns Optional.of(normalAccount)
+            every { noticeRepository.findById(notice.id) } returns Optional.of(notice)
+            every { accountRepository.findRoleByAccount(adminAccount) } returns adminAccount.roles.map { role->role.roleType }
+            every { accountRepository.findRoleByAccount(normalAccount) } returns normalAccount.roles.map { role->role.roleType }
+            every { noticeRepository.findById(nonExistNoticeId) } returns Optional.empty()
+            every { noticeRepository.delete(any()) } just  Runs
+
+            When("ADMIN 사용자이라면") {
+
+                When("존재하는 공지사항이라면") {
+                    val result = mockMvc.delete("/notice/${notice.id}") {
+                        header(HttpHeaders.AUTHORIZATION, adminAccount.id.toString())
+                    }
+                    Then("status code 200 ok") {
+                        result.andExpect { status { isOk() } }
+                    }
+                    Then("status:success") {
+                        result.andExpect { jsonPath("$.status") { value("success") } }
+                    }
+                    result.andDo { print() }
+
+                }
+                When("존재하지 않는 공지사항이라면") {
+                    val result = mockMvc.delete("/notice/${nonExistNoticeId}") {
+                        header(HttpHeaders.AUTHORIZATION, adminAccount.id.toString())
+                    }
+                    Then("status code no content") {
+                        result.andExpect { status { isNoContent() } }
+                    }
+                }
+            }
+            When("ADMIN 사용자가 아니라면") {
+                val result = mockMvc.delete("/notice/${notice.id}") {
+                    header(HttpHeaders.AUTHORIZATION, normalAccount.id.toString())
+                }
+                Then("status code FORBIDDEN") {
+                    result.andExpect { status { isForbidden() } }
                 }
             }
         }
