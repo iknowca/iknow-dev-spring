@@ -9,4 +9,5 @@ interface NoticeService {
     fun postNotice(requestBody: NoticeDto, authorization: String?): ResponseEntity<Map<String, String>>
     fun getNotice(noticeId: Long): ResponseEntity<NoticeDto>
     fun getNoticeList(page: Int, size: Int): ResponseEntity<Page<NoticeDto>>
+    fun deleteNotice(noticeId: Long, authorization: String?): ResponseEntity<Map<String, String>>
 }

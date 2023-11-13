@@ -49,11 +49,43 @@ class NoticeServiceImpl(
     override fun getNoticeList(page: Int, size: Int): ResponseEntity<Page<NoticeDto>> {
         val pageable: Pageable = PageRequest.of(page, size)
         val pageNotice = noticeRepository.findAll(pageable)
-        if (pageNotice.size==0) {
+        if (pageNotice.size == 0) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
         val pageNoticeDto: Page<NoticeDto> =
             pageNotice.map { notice -> NoticeDto(notice.title, notice.content, notice.id) }
         return ResponseEntity.ok(pageNoticeDto)
+    }
+
+    override fun deleteNotice(noticeId: Long, authorization: String?): ResponseEntity<Map<String, String>> {
+        if (authorization==null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+
+        val account:Account = accountService.findAccount(authorization)
+
+        val havePermission: Boolean = accountService.checkRole(account, RoleType.ADMIN)
+        if (!havePermission) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        val notice:Notice
+        try {
+            notice = findNoticeById(noticeId)
+        } catch (e:Exception) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
+
+        noticeRepository.delete(notice)
+
+        return ResponseEntity.ok(mapOf("status" to "success"))
+    }
+
+    fun findNoticeById(noticeId: Long): Notice {
+        val maybeNotice = noticeRepository.findById(noticeId)
+        if (maybeNotice.isEmpty) {
+            throw Exception("no Notice")
+        }
+        return maybeNotice.get()
     }
 }
