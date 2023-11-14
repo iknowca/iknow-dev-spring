@@ -81,6 +81,28 @@ class NoticeServiceImpl(
         return ResponseEntity.ok(mapOf("status" to "success"))
     }
 
+    override fun modifyNotice(modifiedNotice:NoticeDto, noticeId: Long, authorization: String?): ResponseEntity<Map<String, String>> {
+        if(authorization==null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+        val account:Account = accountService.findAccount(authorization)
+        val havePermission: Boolean = accountService.checkRole(account, RoleType.ADMIN)
+        if(!havePermission) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        val notice:Notice
+        try  {
+            notice = findNoticeById(noticeId)
+        } catch (e:Exception) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
+
+        val savedNotice = Notice(modifiedNotice)
+        noticeRepository.save(savedNotice)
+        return ResponseEntity.ok(mapOf("status" to "success", "noticeId" to noticeId.toString()))
+    }
+
     fun findNoticeById(noticeId: Long): Notice {
         val maybeNotice = noticeRepository.findById(noticeId)
         if (maybeNotice.isEmpty) {

@@ -13,4 +13,6 @@ class Notice(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id:Long?=null
 ) {
+    constructor(noticeDto:NoticeDto):this(noticeDto.title, noticeDto.content, noticeDto.id) {
+    }
 }
