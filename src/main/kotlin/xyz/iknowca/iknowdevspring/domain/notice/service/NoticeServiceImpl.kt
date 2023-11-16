@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 import xyz.iknowca.iknowdevspring.domain.account.entity.Account
 import xyz.iknowca.iknowdevspring.domain.account.entity.RoleType
 import xyz.iknowca.iknowdevspring.domain.account.service.AccountService
+import xyz.iknowca.iknowdevspring.domain.notice.entity.Comment
 import xyz.iknowca.iknowdevspring.domain.notice.entity.Notice
 import xyz.iknowca.iknowdevspring.domain.notice.entity.NoticeDto
 import xyz.iknowca.iknowdevspring.domain.notice.exception.NoticeException
@@ -105,6 +106,11 @@ class NoticeServiceImpl(
 
     override fun findById(noticeId: Long): Notice {
         return noticeRepository.findByIdOrNull(noticeId) ?: throw NoticeException(NoticeException.NoticeError.NO_CONTENT)
+    }
+
+    override fun saveComment(comment: Comment): Comment {
+        noticeRepository.save(comment.notice)
+        return comment
     }
 
     fun findNoticeById(noticeId: Long): Notice {

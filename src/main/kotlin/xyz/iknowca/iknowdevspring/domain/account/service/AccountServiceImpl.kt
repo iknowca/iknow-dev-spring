@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestHeader
 import xyz.iknowca.iknowdevspring.domain.account.controller.form.SignForm
 import xyz.iknowca.iknowdevspring.domain.account.entity.Account
 import xyz.iknowca.iknowdevspring.domain.account.entity.RoleType
+import xyz.iknowca.iknowdevspring.domain.account.exception.AccountException
 import xyz.iknowca.iknowdevspring.domain.account.repository.AccountRepository
 import xyz.iknowca.iknowdevspring.domain.account.service.form.AccountDto
 
@@ -44,6 +44,9 @@ class AccountServiceImpl(
 
     override fun findAccount(authorization: String): Account {
         val maybeAccount = accountRepository.findById(authorization.toString().toLong())
+        if (maybeAccount.isEmpty) {
+            throw AccountException("UNAUTHORIZED")
+        }
         return maybeAccount.get()
     }
 
