@@ -2,18 +2,18 @@ package xyz.iknowca.iknowdevspring.domain.notice.service
 
 import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestHeader
 import xyz.iknowca.iknowdevspring.domain.account.entity.Account
 import xyz.iknowca.iknowdevspring.domain.account.entity.RoleType
 import xyz.iknowca.iknowdevspring.domain.account.service.AccountService
 import xyz.iknowca.iknowdevspring.domain.notice.entity.Notice
 import xyz.iknowca.iknowdevspring.domain.notice.entity.NoticeDto
+import xyz.iknowca.iknowdevspring.domain.notice.exception.NoticeException
 import xyz.iknowca.iknowdevspring.domain.notice.repository.NoticeRepository
 
 @Service
@@ -101,6 +101,10 @@ class NoticeServiceImpl(
         val savedNotice = Notice(modifiedNotice)
         noticeRepository.save(savedNotice)
         return ResponseEntity.ok(mapOf("status" to "success", "noticeId" to noticeId.toString()))
+    }
+
+    override fun findById(noticeId: Long): Notice {
+        return noticeRepository.findByIdOrNull(noticeId) ?: throw NoticeException(NoticeException.NoticeError.NO_CONTENT)
     }
 
     fun findNoticeById(noticeId: Long): Notice {

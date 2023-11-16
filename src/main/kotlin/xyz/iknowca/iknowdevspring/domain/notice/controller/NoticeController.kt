@@ -19,7 +19,7 @@ import xyz.iknowca.iknowdevspring.domain.notice.service.NoticeService
 @RestController
 @RequestMapping("/notice")
 @RequiredArgsConstructor
-class NoticeCotroller(val noticeService: NoticeService) {
+class NoticeController(val noticeService: NoticeService) {
     @PostMapping
     fun postNotice(
         @RequestBody requestBody: NoticeDto,

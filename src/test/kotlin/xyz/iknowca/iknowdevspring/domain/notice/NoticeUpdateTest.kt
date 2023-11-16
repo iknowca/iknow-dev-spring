@@ -14,7 +14,7 @@ import xyz.iknowca.iknowdevspring.domain.account.entity.Role
 import xyz.iknowca.iknowdevspring.domain.account.entity.RoleType
 import xyz.iknowca.iknowdevspring.domain.account.repository.AccountRepository
 import xyz.iknowca.iknowdevspring.domain.account.service.AccountServiceImpl
-import xyz.iknowca.iknowdevspring.domain.notice.controller.NoticeCotroller
+import xyz.iknowca.iknowdevspring.domain.notice.controller.NoticeController
 import xyz.iknowca.iknowdevspring.domain.notice.entity.Notice
 import xyz.iknowca.iknowdevspring.domain.notice.repository.NoticeRepository
 import xyz.iknowca.iknowdevspring.domain.notice.service.NoticeServiceImpl
@@ -29,7 +29,7 @@ class NoticeUpdateTest : BehaviorSpec() {
         val noticeRepository = mockk<NoticeRepository>()
         val accountRepository = mockk<AccountRepository>()
         val mockMvc = MockMvcBuilders.standaloneSetup(
-            NoticeCotroller(
+            NoticeController(
                 NoticeServiceImpl(
                     noticeRepository,
                     AccountServiceImpl(accountRepository)
