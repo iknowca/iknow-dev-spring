@@ -45,7 +45,7 @@ class AccountServiceImpl(
     override fun findAccount(authorization: String): Account {
         val maybeAccount = accountRepository.findById(authorization.toString().toLong())
         if (maybeAccount.isEmpty) {
-            throw AccountException("UNAUTHORIZED")
+            throw AccountException()
         }
         return maybeAccount.get()
     }
@@ -53,5 +53,10 @@ class AccountServiceImpl(
     override fun checkRole(account: Account, roleType: RoleType): Boolean {
         val roles:List<RoleType> = accountRepository.findRoleByAccount(account)
         return roleType in roles
+    }
+
+    override fun exsistEmail(email: String): ResponseEntity<Boolean> {
+        val exist = accountRepository.existsByEmail(email)
+        return ResponseEntity.ok(exist)
     }
 }

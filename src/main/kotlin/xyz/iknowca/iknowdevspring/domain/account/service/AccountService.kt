@@ -13,4 +13,5 @@ interface AccountService {
     fun getAccountInfo(auth: String): ResponseEntity<AccountDto>
     fun findAccount(authorization: String): Account
     fun checkRole(account: Account, roleType: RoleType): Boolean
+    fun exsistEmail(email: String): ResponseEntity<Boolean>
 }

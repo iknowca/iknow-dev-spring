@@ -27,4 +27,8 @@ class AccountController(
     fun getAccount(@RequestHeader("authorization") auth:String): ResponseEntity<AccountDto> {
         return accountService.getAccountInfo(auth)
     }
+    @GetMapping("/email-verification/{email}")
+    fun exsistEmail(@PathVariable email:String): ResponseEntity<Boolean> {
+        return accountService.exsistEmail(email)
+    }
 }
