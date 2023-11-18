@@ -1,22 +1,17 @@
 package xyz.iknowca.iknowdevspring.config
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
-import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.config.web.server.ServerHttpSecurity.CorsSpec
-import org.springframework.security.config.web.server.ServerHttpSecurity.http
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
-import org.springframework.web.filter.CorsFilter
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
-@Order(1)
+@Order(0)
 @Configuration
 @EnableWebSecurity
 open class SecurityConfig(
@@ -26,11 +21,25 @@ open class SecurityConfig(
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http.invoke {
             cors {
-                configurationSource = CorsConfigurationSource {
-                    CorsConfiguration().apply { addAllowedOrigin("http://localhost:9000") }
-                }
+                configurationSource = corsConfigurationSource()
+            }
+            csrf { disable() }
+            authorizeRequests {
+                authorize("/**", permitAll)
             }
         }
+
         return http.build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = listOf("http://localhost:9000")
+        configuration.allowedMethods = listOf("POST", "GET", "DELETE", "PUT")
+        configuration.allowedHeaders = listOf("*")
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
     }
 }
