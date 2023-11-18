@@ -28,13 +28,28 @@ class RedisTest(
         val nonExistKey = "non exist key"
 
         Given("Redis에 key와 value를 저장하는 경우") {
-            redisService.setKeyValue(key, value, 0)
+            redisService.setKeyValue(key, value, 1)
             When("정상적으로 저장했다면") {
                 val resultValue = redisService.getValueByKey(key)
                 Then("올바른 value를 리턴한다") {
                     resultValue.shouldBe(value)
                 }
+                When("만료시간을 초과한 후 검색한다면") {
+                    Thread.sleep(2000)
+                    val resultValue = redisService.getValueByKey(key)
+                    Then("null을 리턴한다") {
+                        resultValue.shouldBe(null)
+                    }
+                }
+                When("해당 key value 쌍을 삭제한다면") {
+                    redisService.deleteKeyValue(key)
+                    val resultValue = redisService.getValueByKey(key)
+                    Then("null을 리턴한다") {
+                        resultValue.shouldBe(null)
+                    }
+                }
             }
+
             When("적절하지 않은 키로 검색한다면") {
                 val resultValue = redisService.getValueByKey(nonExistKey)
                 Then("null을 리턴한다") {
